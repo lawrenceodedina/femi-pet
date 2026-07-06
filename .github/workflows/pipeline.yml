@@ -206,8 +206,8 @@ jobs:
                 roleId: ${{ env.VAULT_ROLE_ID }}
                 secretId: ${{ env.VAULT_SECRET_ID }}
                 secrets: |
-                  ${{ env.VAULT_JFROG_PATH }} | JF_USER ;
-                  ${{ env.VAULT_JFROG_PATH }} | JF_PASSWORD
+                  ${{ env.VAULT_JFROG_PATH }} username | JF_USER ;
+                  ${{ env.VAULT_JFROG_PATH }} password | JF_PASSWORD
 
             - name: Upload to Jfrog repo
               run: jf rt upload "target/*.jar" ${{ env.JFROG_REPO }}/
