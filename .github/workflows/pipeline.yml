@@ -188,7 +188,9 @@ jobs:
         name: Push to jfrog
         needs: [trivy-scan, sonarQube-scan]
         runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/dev' && github.event == 'push'
+        if: |
+          github.ref == 'refs/heads/dev' &&
+          github.event == 'push'
         steps:
             - name: Download build artifact
               uses: actions/download-artifact@v4
