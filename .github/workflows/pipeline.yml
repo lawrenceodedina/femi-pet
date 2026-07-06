@@ -186,11 +186,11 @@ jobs:
                 if-no-files-found: ignore
     publish:
         name: Push to jfrog
-        needs: [trivy-scan, sonarQube-scan]
+        needs: [ trivy-scan, sonarQube-scan ]
         runs-on: ubuntu-latest
         if: |
           github.ref == 'refs/heads/dev' &&
-          github.event == 'push'
+          github.event_name == 'push'
         steps:
             - name: Download build artifact
               uses: actions/download-artifact@v4
