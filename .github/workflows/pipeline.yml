@@ -16,7 +16,7 @@ env:
   VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
   VAULT_JFROG_PATH: secrets/creds/jfrog
   JFROG_URL: ${{ secrets.JFROG_URL }}
-  JFROG_REPO: 'lawrence-femi-petclinic'
+  JFROG_REPO: 'lawrence-femi-clinic'
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
@@ -184,3 +184,28 @@ jobs:
                 name: Trivy-fs-report
                 path: trivy-results .
                 if-no-files-found: ignore
+    publish:
+        name: Push to jfrog
+        needs: [trivy-scan, sonarQube-scan]
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/dev' && github.event == 'push'
+        steps:
+            - name: Download build artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: app-jar
+                path: target
+            
+            - name: Authenticate to vault
+              uses: hashicorp/vault-action@v3
+              with:
+                url: ${{ env.VAULT_ADDR }}
+                method: approle
+                roleId: ${{ env.VAULT_ROLE_ID }}
+                secretId: ${{ env.VAULT_SECRET_ID }}
+                secrets: |
+                  ${{ env.VAULT_JFROG_PATH }} | JF_USER ;
+                  ${{ env.VAULT_JFROG_PATH }} | JF_PASSWORD
+
+            - name: Upload to Jfrog repo
+              run: jf rt upload "target/*.jar" ${{ env.JFROG_REPO }}/
