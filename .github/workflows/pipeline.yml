@@ -91,9 +91,6 @@ jobs:
               name: surefire-reports
               path: target/surefire-reports/
               if-no-files-found: ignore
-
-    
-
  
     sonarQube-scan:
         name: SonarQube-Scan
@@ -144,5 +141,46 @@ jobs:
             branch: dev
             fail-on-quality-gate-error: false
 
+    trivy-scan:
+        name: Trivy filesystem scan
+        needs: sonarQube-scan
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-                
+            - name: setup JDK
+              uses: actions/setup-java@v4
+              with:
+                java-version: ${{ env.JAVA_VERSION }}
+                distribution: 'temurin'
+                cache: maven
+            
+            - name: Populate maven cache
+              run: |
+                mvn -B dependency:resolve -DskipTests \
+                  --no-transfer-progress
+            
+            - name: Download Build artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: app.jar
+                path: target
+            
+            - name: Run trivy filesystem scan
+              uses: aquasecurity/trivy-action@v0.36.0
+              with:
+                scan-type: 'fs'
+                scan-ref: '.'
+                severity: 'CRITICAL,HIGH'
+                format: 'table'
+                exit-code: '0'
+                ignore-unfixed: true
+            
+            - name: Upload trivy results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: Trivy-fs-report
+                path: trivy-results .
+                if-no-files-found: ignore
