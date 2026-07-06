@@ -119,8 +119,6 @@ jobs:
             - name: Compile project for Analysis
               run: mvn -B compile -DskipTests
 
-            - name: Compile project for analysis
-              run: mvn -B compile -DskipTests
  
             - name: SonarQube code analysis
               uses: SonarSource/sonarqube-scan-action@v4
