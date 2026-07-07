@@ -293,3 +293,21 @@ jobs:
                 path: trivy-docker-scan.txt
                 if-no-files-found: ignore
                 retention-days: 1
+
+    deploy-ecs:
+        name: Deploy to ECS
+        needs: docker-image-scan
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        steps:
+            - name: Configure aws credentials
+              uses: aws-actions/aw-configure-credentials@v4
+              with:
+                role-to-assume: ${{ env.AWS_ROLE_ARN }}
+                aws-region: ${{ env.AWS_REGION }}
+            
+            - name: Deploy to ecs
+              run: aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
+
