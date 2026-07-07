@@ -212,7 +212,7 @@ jobs:
             - name: Setup Jfrog CLI
               uses: jfrog/setup-jfrog-cli@v4
               env:
-                JF_URL: ${{ env.JF_URL }}
+                JF_URL: ${{ env.JFROG_URL }}
                 JF_USER: ${{ env.JF_USER }}
                 JF_PASSWORD: ${{ env.JF_PASSWORD }}
 
