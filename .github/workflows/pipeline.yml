@@ -184,10 +184,10 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: Trivy-fs-report
-                path: trivy-fs-report.txt
+                path: Trivy-fs-report.txt
                 if-no-files-found: ignore
                 retention-days: 1
-                
+
     publish:
         name: Push to jfrog
         needs: [ trivy-scan, sonarQube-scan ]
@@ -254,3 +254,32 @@ jobs:
                 docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                 docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
                 docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    
+    docker-image-scan:
+        name: Trivy Scan - ECR image
+        needs: docker-build-push
+        runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: Configure aws credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                role-to-assume: ${{ env.AWS_ROLE_ARN }}
+                aws-region: ${{ env.AWS_REGION }}
+            
+            - name: Login to ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+            
+            - name: Scan image with Trivy
+              uses: aquasecurity/trivy-action@0.36.0
+              with:
+                image-ref: ${{ steps.login-ecr.outputs.registry }}/${{env.ECR_REPOSITORY}}:${{ github.sha }}
+                format: 'table'
+                exit-code: '0'
+                severity: 'CRITICAL,HIGH'
