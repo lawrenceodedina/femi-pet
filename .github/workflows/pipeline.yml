@@ -91,6 +91,7 @@ jobs:
               name: surefire-reports
               path: target/surefire-reports/
               if-no-files-found: ignore
+              retention-days: 1
  
     sonarQube-scan:
         name: SonarQube-Scan
@@ -185,6 +186,8 @@ jobs:
                 name: Trivy-fs-report
                 path: trivy-fs-report.txt
                 if-no-files-found: ignore
+                retention-days: 1
+                
     publish:
         name: Push to jfrog
         needs: [ trivy-scan, sonarQube-scan ]
