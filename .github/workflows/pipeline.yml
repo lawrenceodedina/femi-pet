@@ -208,6 +208,13 @@ jobs:
                 secrets: |
                   ${{ env.VAULT_JFROG_PATH }} username | JF_USER ;
                   ${{ env.VAULT_JFROG_PATH }} password | JF_PASSWORD
+            
+            - name: Setup Jfrog CLI
+              uses: jfrog/setup-jfrog-cli@v4
+              env:
+                JF_URL: ${{ env.JF_URL }}
+                JF_USER: ${{ env.JF_USER }}
+                JF_PASSWORD: ${{ env.JF_PASSWORD }}
 
             - name: Upload to Jfrog repo
               run: jf rt upload "target/*.jar" ${{ env.JFROG_REPO }}/
